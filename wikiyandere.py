@@ -1,9 +1,6 @@
 import sys
 import threading
-import time
 from datetime import datetime
-
-import aioschedule
 import aiosqlite as sl
 import asyncio
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -12,7 +9,6 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils import executor
 import logging
 from aiogram import Bot as tBot, Dispatcher, types
-from mwclient import Site
 
 time1 = datetime.today().timestamp()
 logging.basicConfig(level=logging.WARNING, filename='wy_log.txt', format='%(asctime)s %(levelname)s:%(message)s')
@@ -20,14 +16,14 @@ SITE = "ru.wikipedia.org"
 
 import editsFinder
 
-API_KEY = "5683263617:AAEm40XUa9ZHmh25KtM2KQqkLmfV110aDS4"
+API_KEY = "API_KEY"
 bot = tBot(token=API_KEY)
 dp = Dispatcher(bot, storage=MemoryStorage())
 logging.basicConfig(level=logging.WARNING, filename='wy_log.txt', format='%(asctime)s %(levelname)s:%(message)s')
 sys.stderr = open('wy_log.txt', 'a')
 DB = "maindata.sqlite"
-PASSWORD = "TGFtYmRhRGVsdGEwNyE="
-HINT = "Witch blonde 64"
+PASSWORD = "PASSWORD"
+HINT = "HINT"
 available_users = set()
 
 #Отправка сообщения
@@ -48,7 +44,7 @@ async def get_users():
   async with sl.connect(DB) as con:
     cursor = await con.execute(f'SELECT id FROM users')
     users = await cursor.fetchall()
-  available_users = set(*users)
+  available_users = set([user[0] for user in users])
 
 async def on_startup(x):
   asyncio.create_task(get_users())
@@ -74,7 +70,7 @@ async def addingStart(message: types.Message):
   id = message.from_user.id
   if id not in available_users:
     return
-  await write_msg("введи имя цели", id)
+  await write_msg("введите название страницы", id)
   await BotState.addUser.set()
 
 
@@ -99,7 +95,7 @@ async def deleteStart(message: types.Message):
   id = message.from_user.id
   if id not in available_users:
     return
-  await write_msg("введи имя цели", id)
+  await write_msg("введите название страницы", id)
   await BotState.removeUser.set()
 
 
@@ -167,8 +163,11 @@ async def deleteStart(message: types.Message):
 # Получение доступа к боту - запрос пароля
 @dp.message_handler(commands=['access'])
 async def startAccess(message: types.Message):
-  await write_msg("Впедите пароль", message.from_user.id)
-  await BotState.access.set()
+  if not available_users or message.from_user.id not in available_users:
+    await write_msg("Введите пароль", message.from_user.id)
+    await BotState.access.set()
+    return
+  await write_msg("Вы уже получили доступ к боту", message.from_user.id)
 
 # Получение доступа к боту - получение пароля
 @dp.message_handler(state=BotState.access)
@@ -182,7 +181,7 @@ async def getAccess (message: types.Message, state: FSMContext):
       await message.reply("Вам предоставлен доступ к боту")
       available_users.add(user)
     except:
-      await message.reply("Похоже, вы уже получили доступ")
+      logging.warning(f"Произошла ошибка про получении доступа к боту участником {user}")
     finally:
       await state.reset_state()
     return
