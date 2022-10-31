@@ -1,5 +1,4 @@
 import threading
-from datetime import datetime
 import aiosqlite as sl
 import asyncio
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -10,7 +9,6 @@ import logging
 from aiogram import Bot as tBot, Dispatcher, types
 import editsFinder
 
-time1 = datetime.today().timestamp()
 logging.basicConfig(level=logging.WARNING, filename='wy_log.txt', format='%(asctime)s %(levelname)s:%(message)s')
 API_KEY = "TOKEN"
 bot = tBot(token=API_KEY)
@@ -174,8 +172,9 @@ async def getAccess (message: types.Message, state: FSMContext):
         await con.commit()
       await message.reply("Вам предоставлен доступ к боту")
       available_users.add(user)
-    except:
+    except Exception as e:
       logging.warning(f"Произошла ошибка про получении доступа к боту участником {user}")
+      logging.warning(e)
     finally:
       await state.reset_state()
     return
