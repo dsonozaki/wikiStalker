@@ -1,4 +1,3 @@
-import sys
 import threading
 from datetime import datetime
 import aiosqlite as sl
@@ -9,18 +8,13 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.utils import executor
 import logging
 from aiogram import Bot as tBot, Dispatcher, types
+import editsFinder
 
 time1 = datetime.today().timestamp()
 logging.basicConfig(level=logging.WARNING, filename='wy_log.txt', format='%(asctime)s %(levelname)s:%(message)s')
-SITE = "ru.wikipedia.org"
-
-import editsFinder
-
-API_KEY = "API_KEY"
+API_KEY = "TOKEN"
 bot = tBot(token=API_KEY)
 dp = Dispatcher(bot, storage=MemoryStorage())
-logging.basicConfig(level=logging.WARNING, filename='wy_log.txt', format='%(asctime)s %(levelname)s:%(message)s')
-sys.stderr = open('wy_log.txt', 'a')
 DB = "maindata.sqlite"
 PASSWORD = "PASSWORD"
 HINT = "HINT"
